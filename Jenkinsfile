@@ -1,10 +1,10 @@
 pipeline {
+
     agent any
 
-
-
-tools {
+    tools {
         nodejs 'NodeJS-26'
+        sonarQube 'SonarScanner'
     }
 
     environment {
@@ -40,23 +40,26 @@ tools {
 
         stage('SonarQube Analysis') {
             steps {
+
                 withCredentials([
                     string(
                         credentialsId: 'SONAR_TOKEN',
                         variable: 'SONAR_TOKEN'
                     )
                 ]) {
+
                     sh '''
                         sonar-scanner \
                         -Dsonar.organization=skandar05 \
                         -Dsonar.projectKey=Skandar05_shopCore \
-                        -Dsonar.host.url=https://sonarcloud.io
+                        -Dsonar.host.url=https://sonarcloud.io \
                         -Dsonar.sources=backend \
                         -Dsonar.token=$SONAR_TOKEN
                     '''
                 }
             }
         }
+
         stage('Docker Login') {
             steps {
 
@@ -82,7 +85,7 @@ tools {
 
                 sh '''
                     docker build -t ${IMAGE_AUTH}:latest ./backend/services/auth-service
-                    docker build -t ${IMAGE_PRODUCT}:latest ./backend/services/product-service
+                    docker build -t ${IMAGE_PRODUCT}:latest ./backend/services/produit-service
                     docker build -t ${IMAGE_GATEWAY}:latest ./backend/api-gateway
                 '''
             }
