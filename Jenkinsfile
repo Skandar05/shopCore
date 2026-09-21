@@ -28,7 +28,7 @@ tools {
                     sh 'npm install'
                 }
 
-                dir('backend/services/product-service') {
+                dir('backend/services/produit-service') {
                     sh 'npm install'
                 }
 
