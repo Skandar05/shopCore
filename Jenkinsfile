@@ -5,6 +5,7 @@ pipeline {
 
 tools {
         nodejs 'NodeJS-26'
+        sonarQube 'SonarScanner'
     }
 
     environment {
