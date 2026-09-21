@@ -4,7 +4,7 @@ pipeline {
 
     tools {
         nodejs 'NodeJS-26'
-        sonarRunner 'SonarScanner'
+        
     }
 
     environment {
@@ -39,26 +39,29 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-            steps {
+    steps {
+        withCredentials([
+            string(
+                credentialsId: 'SONAR_TOKEN',
+                variable: 'SONAR_TOKEN'
+            )
+        ]) {
 
-                withCredentials([
-                    string(
-                        credentialsId: 'SONAR_TOKEN',
-                        variable: 'SONAR_TOKEN'
-                    )
-                ]) {
+            script {
+                def scannerHome = tool 'SonarScanner'
 
-                    sh '''
-                        sonar-scanner \
-                        -Dsonar.organization=skandar05 \
-                        -Dsonar.projectKey=Skandar05_shopCore \
-                        -Dsonar.host.url=https://sonarcloud.io \
-                        -Dsonar.sources=backend \
-                        -Dsonar.token=$SONAR_TOKEN
-                    '''
-                }
+                sh """
+                    ${scannerHome}/bin/sonar-scanner \
+                    -Dsonar.organization=skandar05 \
+                    -Dsonar.projectKey=Skandar05_shopCore \
+                    -Dsonar.host.url=https://sonarcloud.io \
+                    -Dsonar.sources=backend \
+                    -Dsonar.token=$SONAR_TOKEN
+                """
             }
         }
+    }
+}
 
         stage('Docker Login') {
             steps {
