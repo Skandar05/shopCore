@@ -5,7 +5,7 @@ pipeline {
 
 tools {
         nodejs 'NodeJS-26'
-        
+        sonarQube 'SonarScanner'
     }
 
     environment {
@@ -41,14 +41,12 @@ tools {
 
         stage('SonarQube Analysis') {
             steps {
-
                 withCredentials([
                     string(
                         credentialsId: 'SONAR_TOKEN',
                         variable: 'SONAR_TOKEN'
                     )
                 ]) {
-
                     sh '''
                         sonar-scanner \
                         -Dsonar.organization=skandar05 \
@@ -59,7 +57,6 @@ tools {
                 }
             }
         }
-
         stage('Docker Login') {
             steps {
 
