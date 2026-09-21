@@ -1,8 +1,13 @@
 pipeline {
     agent any
 
+
+
+tools {
+        nodejs 'NodeJS-22'
+    }
+
     environment {
-        SONARQUBE = 'SonarQube'
         IMAGE_AUTH = 'skandar55/shopcore-auth'
         IMAGE_PRODUCT = 'skandar55/shopcore-product'
         IMAGE_GATEWAY = 'skandar55/shopcore-gateway'
@@ -18,9 +23,11 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
+
                 dir('backend/services/auth-service') {
                     sh 'npm install'
                 }
+
                 dir('backend/services/product-service') {
                     sh 'npm install'
                 }
@@ -28,10 +35,8 @@ pipeline {
                 dir('backend/api-gateway') {
                     sh 'npm install'
                 }
-
             }
         }
-    
 
         stage('SonarQube Analysis') {
             steps {
@@ -42,6 +47,7 @@ pipeline {
                         variable: 'SONAR_TOKEN'
                     )
                 ]) {
+
                     sh '''
                         sonar-scanner \
                         -Dsonar.organization=skandar05 \
@@ -50,31 +56,35 @@ pipeline {
                         -Dsonar.token=$SONAR_TOKEN
                     '''
                 }
-                
             }
         }
-        stage('Docker login'){
-           steps {
-        withCredentials([
-            usernamePassword(
-                credentialsId: 'dockerhub-credentials',
-                usernameVariable: 'DOCKER_USERNAME',
-                passwordVariable: 'DOCKER_TOKEN'
-            )
-        ]) {
-            sh '''
-                echo "$DOCKER_TOKEN" | docker login \
-                    -u "$DOCKER_USERNAME" \
-                    --password-stdin
-            '''
+
+        stage('Docker Login') {
+            steps {
+
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-credentials',
+                        usernameVariable: 'DOCKER_USERNAME',
+                        passwordVariable: 'DOCKER_TOKEN'
+                    )
+                ]) {
+
+                    sh '''
+                        echo "$DOCKER_TOKEN" | docker login \
+                            -u "$DOCKER_USERNAME" \
+                            --password-stdin
+                    '''
+                }
+            }
         }
-    }
-        }
+
         stage('Docker Build') {
             steps {
+
                 sh '''
-                    docker build -t ${IMAGE_AUTH}:latest ./backend/auth-service
-                    docker build -t ${IMAGE_PRODUCT}:latest ./backend/product-service
+                    docker build -t ${IMAGE_AUTH}:latest ./backend/services/auth-service
+                    docker build -t ${IMAGE_PRODUCT}:latest ./backend/services/product-service
                     docker build -t ${IMAGE_GATEWAY}:latest ./backend/api-gateway
                 '''
             }
@@ -82,6 +92,7 @@ pipeline {
 
         stage('Trivy Scan') {
             steps {
+
                 sh '''
                     trivy image --severity HIGH,CRITICAL --exit-code 1 ${IMAGE_AUTH}:latest
                     trivy image --severity HIGH,CRITICAL --exit-code 1 ${IMAGE_PRODUCT}:latest
@@ -92,6 +103,7 @@ pipeline {
 
         stage('Deploy') {
             steps {
+
                 sh '''
                     docker push ${IMAGE_AUTH}:latest
                     docker push ${IMAGE_PRODUCT}:latest
@@ -102,6 +114,7 @@ pipeline {
     }
 
     post {
+
         success {
             echo 'CI/CD terminée avec succès !'
         }
