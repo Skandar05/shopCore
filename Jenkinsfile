@@ -5,7 +5,6 @@ pipeline {
 
 tools {
         nodejs 'NodeJS-26'
-        sonarQube 'SonarScanner'
     }
 
     environment {
@@ -51,6 +50,7 @@ tools {
                         sonar-scanner \
                         -Dsonar.organization=skandar05 \
                         -Dsonar.projectKey=Skandar05_shopCore \
+                        -Dsonar.host.url=https://sonarcloud.io
                         -Dsonar.sources=backend \
                         -Dsonar.token=$SONAR_TOKEN
                     '''
