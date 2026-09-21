@@ -43,7 +43,7 @@ tools {
 
                 withCredentials([
                     string(
-                        credentialsId: 'sonar-token',
+                        credentialsId: 'SONAR_TOKEN',
                         variable: 'SONAR_TOKEN'
                     )
                 ]) {
